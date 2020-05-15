@@ -35,6 +35,6 @@ public class JedisManager {
 
     private String nodes;
 
-    private Integer maxRedirects;
+    private Integer maxRedirects = 1;
 
 }
