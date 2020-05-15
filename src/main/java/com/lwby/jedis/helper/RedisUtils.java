@@ -1,6 +1,7 @@
 package com.lwby.jedis.helper;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,9 @@ public class RedisUtils {
 
     }
 
-    public <T> T get(String key, Class<T> tClass) {
+    public <T> T get(String key, TypeReference<T> type) {
         String s = jedisCluster.get(key);
-        T t = JSONObject.parseObject(s, tClass);
+        T t = JSONObject.parseObject(s, type);
         return t;
     }
 
@@ -82,10 +83,10 @@ public class RedisUtils {
         return jedisCluster.llen(key);
     }
 
-    public <T> List<T> lrange(String key, long start, long end, Class<T> tClass) {
+    public <T> List<T> lrange(String key, long start, long end, TypeReference<T> type) {
         List<String> list = jedisCluster.lrange(key, start, end);
         return list.stream()
-                .map(json -> JSONObject.parseObject(json, tClass))
+                .map(json -> JSONObject.parseObject(json, type))
                 .collect(Collectors.toList());
     }
 
@@ -94,9 +95,9 @@ public class RedisUtils {
         return jedisCluster.lpush(key, json);
     }
 
-    public <T> T lpop(String key, Class<T> tClass) {
+    public <T> T lpop(String key, TypeReference<T> type) {
         String json = jedisCluster.lpop(key);
-        return JSONObject.parseObject(json, tClass);
+        return JSONObject.parseObject(json, type);
     }
 
     public Long rpush(String key, Object value) {
@@ -104,14 +105,19 @@ public class RedisUtils {
         return jedisCluster.rpush(key, json);
     }
 
-    public <T> T rpop(String key, Class<T> tClass) {
+    public <T> T rpop(String key, TypeReference<T> type) {
         String json = jedisCluster.rpop(key);
-        return JSONObject.parseObject(json, tClass);
+        return JSONObject.parseObject(json, type);
     }
 
-    public <T> Map<T, Double> zrevrangeWithScores(String key, long start, long end, Class<T> tClass) {
+    public <T> Map<T, Double> zrevrangeWithScores(String key, long start, long end, TypeReference<T> type) {
         Set<Tuple> tuples = jedisCluster.zrevrangeWithScores(key, start, end);
-        return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), tClass), Tuple::getScore));
+        return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
+    }
+
+    public <T> T hget(String key, String field, TypeReference<T> type) {
+        String json = jedisCluster.hget(key, field);
+        return JSONObject.parseObject(json, type);
     }
 
 
