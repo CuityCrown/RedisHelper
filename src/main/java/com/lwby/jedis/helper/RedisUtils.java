@@ -52,9 +52,8 @@ public class RedisUtils {
     }
 
     public <T> T get(String key, TypeReference<T> type) {
-        String s = jedisCluster.get(key);
-        T t = JSONObject.parseObject(s, type);
-        return t;
+        String json = jedisCluster.get(key);
+        return JSONObject.parseObject(json, type);
     }
 
     public void set(String key, Object value) {
@@ -65,6 +64,32 @@ public class RedisUtils {
     public void setex(String key, int expires, Object value) {
         String json = JSONObject.toJSONString(value);
         jedisCluster.setex(key, expires, json);
+    }
+
+    public <T> T getSet(String key, Object value, TypeReference<T> type) {
+        String json = JSONObject.toJSONString(value);
+        String oldJson = jedisCluster.getSet(key, json);
+        return JSONObject.parseObject(oldJson, type);
+    }
+
+    public boolean exists(String key) {
+        return jedisCluster.exists(key);
+    }
+
+    public Long incr(String key) {
+        return jedisCluster.incr(key);
+    }
+
+    public Long incrby(String key, int increment) {
+        return jedisCluster.incrBy(key, increment);
+    }
+
+    public Long decr(String key) {
+        return jedisCluster.decr(key);
+    }
+
+    public Long decrBy(String key, int increment) {
+        return jedisCluster.decrBy(key, increment);
     }
 
     public Long del(String key) {
@@ -110,6 +135,20 @@ public class RedisUtils {
         return JSONObject.parseObject(json, type);
     }
 
+    public Long lrem(String key, long count, Object value) {
+        String json = JSONObject.toJSONString(value);
+        return jedisCluster.lrem(key, count, json);
+    }
+
+    public String ltrim(String key, long start, long end) {
+        return jedisCluster.ltrim(key, start, end);
+    }
+
+    public String lset(String key, long index, Object value) {
+        String json = JSONObject.toJSONString(value);
+        return jedisCluster.lset(key, index, json);
+    }
+
     public <T> Map<T, Double> zrevrangeWithScores(String key, long start, long end, TypeReference<T> type) {
         Set<Tuple> tuples = jedisCluster.zrevrangeWithScores(key, start, end);
         return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
@@ -118,6 +157,20 @@ public class RedisUtils {
     public <T> T hget(String key, String field, TypeReference<T> type) {
         String json = jedisCluster.hget(key, field);
         return JSONObject.parseObject(json, type);
+    }
+
+    public Long hset(String key, String field, Object value) {
+        String json = JSONObject.toJSONString(value);
+        return jedisCluster.hset(key, field, json);
+    }
+
+    public <T> Map<String, T> hgetAll(String key, TypeReference<T> type) {
+        Map<String, String> stringMap = jedisCluster.hgetAll(key);
+        return stringMap.keySet().stream().collect(Collectors.toMap(k -> k, v -> JSONObject.parseObject(stringMap.get(v), type)));
+    }
+
+    public Long hdel(String key, String... fields) {
+        return jedisCluster.hdel(key, fields);
     }
 
     public void zadd(String key, double score, String member) {
