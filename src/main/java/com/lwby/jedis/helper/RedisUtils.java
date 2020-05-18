@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import redis.clients.jedis.*;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Tuple;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
@@ -115,6 +118,11 @@ public class RedisUtils {
     public <T> T hget(String key, String field, TypeReference<T> type) {
         String json = jedisCluster.hget(key, field);
         return JSONObject.parseObject(json, type);
+    }
+
+    public void zadd(String key, double score, String member) {
+        String json = JSONObject.toJSONString(member);
+        jedisCluster.zadd(key, score, json);
     }
 
 }
