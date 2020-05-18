@@ -35,6 +35,9 @@ public class RedisUtils {
     @Autowired
     private JedisManager jedisManager;
 
+    public String zMinScore = "-inf";
+    public String zMaxScore = "+inf";
+
     @PostConstruct
     private void init() {
         try {
@@ -72,7 +75,7 @@ public class RedisUtils {
         return JSONObject.parseObject(oldJson, type);
     }
 
-    public boolean exists(String key) {
+    public Boolean exists(String key) {
         return jedisCluster.exists(key);
     }
 
@@ -149,6 +152,11 @@ public class RedisUtils {
         return jedisCluster.lset(key, index, json);
     }
 
+    public <T> T lindex(String key, int index, TypeReference<T> type) {
+        String json = jedisCluster.lindex(key, index);
+        return JSONObject.parseObject(json, type);
+    }
+
     public <T> Map<T, Double> zrevrangeWithScores(String key, long start, long end, TypeReference<T> type) {
         Set<Tuple> tuples = jedisCluster.zrevrangeWithScores(key, start, end);
         return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
@@ -176,6 +184,41 @@ public class RedisUtils {
     public void zadd(String key, double score, String member) {
         String json = JSONObject.toJSONString(member);
         jedisCluster.zadd(key, score, json);
+    }
+
+    public Long zcard(String key) {
+        return jedisCluster.zcard(key);
+    }
+
+    public Long zcount(String key) {
+        return jedisCluster.zcount(key, zMinScore, zMaxScore);
+    }
+
+    public Long zcount(String key, String min, String max) {
+        return jedisCluster.zcount(key, min, max);
+    }
+
+    public Long zrem(String key, Object value) {
+        String json = JSONObject.toJSONString(value);
+        return jedisCluster.zrem(key, json);
+    }
+
+    public Long zremrangebyrank(String key, long start, long end) {
+        return jedisCluster.zremrangeByRank(key, start, end);
+    }
+
+    public Double zscore(String key, String member) {
+        return jedisCluster.zscore(key, member);
+    }
+
+    public Double zincrby(String key, double score, Object value) {
+        String json = JSONObject.toJSONString(value);
+        return jedisCluster.zincrby(key, score, json);
+    }
+
+    public <T> Map<T, Double> zrange(String key, long start, long end, TypeReference<T> type) {
+        Set<Tuple> tuples = jedisCluster.zrangeWithScores(key, start, end);
+        return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
     }
 
 }
