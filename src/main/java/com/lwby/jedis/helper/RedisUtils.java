@@ -35,8 +35,8 @@ public class RedisUtils {
     @Autowired
     private JedisManager jedisManager;
 
-    public String zMinScore = "-inf";
-    public String zMaxScore = "+inf";
+    private String zMinScore = "-inf";
+    private String zMaxScore = "+inf";
 
     @PostConstruct
     private void init() {
