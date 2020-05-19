@@ -7,6 +7,10 @@
     <groupId>com.lwby</groupId>
     <artifactId>redis-helper</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <name>redis-helper</name>
+    <url>http://www.example.com</url>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -30,16 +34,42 @@
         </dependency>
     </dependencies>
 
+    <!-- 设定团队持续集成发布包服务器  -->
+    <distributionManagement>
+        <repository>
+            <id>lwby-releases</id>
+            <name>releases repository</name>
+            <url>http://maven.bayread.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>lwby-snapshots</id>
+            <name>snapshots repository</name>
+            <url>http://maven.bayread.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <encoding>utf8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
