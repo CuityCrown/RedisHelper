@@ -186,6 +186,11 @@ public class RedisUtils {
         jedisCluster.zadd(key, score, json);
     }
 
+    public void zadd(String key, double score, Object member) {
+        String json = JSONObject.toJSONString(member);
+        jedisCluster.zadd(key, score, json);
+    }
+
     public Long zcard(String key) {
         return jedisCluster.zcard(key);
     }
