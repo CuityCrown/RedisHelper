@@ -1,4 +1,4 @@
-package com.lwby.jedis.helper;
+package com.lwby.jedis.helper.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +16,8 @@ public class JedisConfiguration {
 
     @Bean
     @ConfigurationProperties(value = "jedis.redis")
-    public JedisManager jedisManager() {
-        return new JedisManager();
+    public JedisConfig createJedisConfig() {
+        return new JedisConfig();
     }
 
 }

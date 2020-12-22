@@ -1,4 +1,4 @@
-package com.lwby.jedis.helper;
+package com.lwby.jedis.helper.config;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 
 @Data
-public class JedisManager {
+public class JedisConfig {
 
     private int database = 0;
 

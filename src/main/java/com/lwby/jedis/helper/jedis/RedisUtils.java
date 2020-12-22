@@ -1,7 +1,10 @@
-package com.lwby.jedis.helper;
+package com.lwby.jedis.helper.jedis;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.lwby.jedis.helper.config.JedisConfig;
+import com.lwby.jedis.helper.constant.RedisConstant;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +15,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Tuple;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +33,7 @@ public class RedisUtils {
     private JedisCluster jedisCluster;
 
     @Autowired
-    private JedisManager jedisManager;
+    private JedisConfig jedisConfig;
 
     private String zMinScore = "-inf";
     private String zMaxScore = "+inf";
@@ -42,12 +42,13 @@ public class RedisUtils {
     private void init() {
         try {
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-            String[] nodes = jedisManager.getNodes().split(",");
+            String[] nodes = jedisConfig.getNodes().split(RedisConstant.DEFAULT_SPLIT);
             Set<HostAndPort> hostAndPorts = Arrays.stream(nodes).map(n -> {
-                String[] split = n.split(":");
+                String[] split = n.split(RedisConstant.HOST_AND_PORT_SPLIT);
                 return new HostAndPort(split[0], Integer.valueOf(split[1]));
             }).collect(Collectors.toSet());
-            jedisCluster = new JedisCluster(hostAndPorts, jedisManager.getTimeout(), jedisManager.getTimeout(), jedisManager.getMaxRedirects(), jedisManager.getPassword(), jedisPoolConfig);
+            jedisCluster = new JedisCluster(hostAndPorts, jedisConfig.getTimeout(), jedisConfig.getTimeout(), jedisConfig.getMaxRedirects(),
+                    jedisConfig.getPassword(), jedisPoolConfig);
         } catch (Exception e) {
             logger.error("init RedisUtils is failed", e);
         }
@@ -224,6 +225,29 @@ public class RedisUtils {
     public <T> Map<T, Double> zrange(String key, long start, long end, TypeReference<T> type) {
         Set<Tuple> tuples = jedisCluster.zrangeWithScores(key, start, end);
         return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
+    }
+
+    public <T> T getList(List<String> list, TypeReference<T> type) {
+        return null;
+    }
+
+    public <T> List<T> mget(List<String> list, TypeReference<T> type) {
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        String[] keyArray = list.toArray(new String[0]);
+        List<String> jsonList = jedisCluster.mget(keyArray);
+        if (CollectionUtils.isNotEmpty(jsonList)) {
+            List<T> result = new ArrayList<>();
+            for (String json : jsonList) {
+                result.add(JSONObject.parseObject(json, type));
+            }
+            return result;
+        }
+        return null;
+    }
+
+    public void mset(){
     }
 
 }
