@@ -19,25 +19,34 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * description:
+ * redis工具类
  *
  * @author 刘一博
- * @version V1.0
- * @date 2020/5/15 10:51
+ * @version ContentLevelBookFilterService.java, v 0.1 2020年5月15日 10:51 刘一博 Exp $
  */
 @Component
 public class RedisUtils {
 
-    private final static Logger logger = LoggerFactory.getLogger(RedisUtils.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(RedisUtils.class);
 
     private JedisCluster jedisCluster;
 
     @Autowired
     private JedisConfig jedisConfig;
 
-    private String zMinScore = "-inf";
-    private String zMaxScore = "+inf";
+    /**
+     * 负无穷
+     */
+    private static String Z_MIN_SCORE = "-inf";
 
+    /**
+     * 正无穷
+     */
+    private static String Z_MAX_SCORE = "+inf";
+
+    /**
+     * 初始化redis工具类
+     */
     @PostConstruct
     private void init() {
         try {
@@ -50,7 +59,7 @@ public class RedisUtils {
             jedisCluster = new JedisCluster(hostAndPorts, jedisConfig.getTimeout(), jedisConfig.getTimeout(), jedisConfig.getMaxRedirects(),
                     jedisConfig.getPassword(), jedisPoolConfig);
         } catch (Exception e) {
-            logger.error("init RedisUtils is failed", e);
+            LOGGER.error("init RedisUtils is failed", e);
         }
 
     }
@@ -197,7 +206,7 @@ public class RedisUtils {
     }
 
     public Long zcount(String key) {
-        return jedisCluster.zcount(key, zMinScore, zMaxScore);
+        return jedisCluster.zcount(key, Z_MIN_SCORE, Z_MAX_SCORE);
     }
 
     public Long zcount(String key, String min, String max) {
@@ -227,10 +236,14 @@ public class RedisUtils {
         return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
     }
 
-    public <T> T getList(List<String> list, TypeReference<T> type) {
-        return null;
-    }
-
+    /**
+     * 批量get
+     *
+     * @param list 需要获取的Key列表
+     * @param type 获取数据的类型
+     * @param <T>  泛型
+     * @return 结果列表
+     */
     public <T> List<T> mget(List<String> list, TypeReference<T> type) {
         if (CollectionUtils.isEmpty(list)) {
             return null;
@@ -247,7 +260,22 @@ public class RedisUtils {
         return null;
     }
 
-    public void mset(){
+    /**
+     * 批量set
+     *
+     * @param map 需要执行set的key 和 value
+     */
+    public void mset(Map<String, Object> map) {
+        if (map == null || map.size() <= 0) {
+            return;
+        }
+        List<String> list = new ArrayList<>();
+        for (String key : map.keySet()) {
+            list.add(key);
+            list.add(JSONObject.toJSONString(map.get(key)));
+        }
+        String[] keysValues = list.toArray(new String[] {});
+        jedisCluster.mset(keysValues);
     }
 
 }
