@@ -35,16 +35,6 @@ public class RedisUtils {
     private JedisConfig jedisConfig;
 
     /**
-     * 负无穷
-     */
-    private static String Z_MIN_SCORE = "-inf";
-
-    /**
-     * 正无穷
-     */
-    private static String Z_MAX_SCORE = "+inf";
-
-    /**
      * 初始化redis工具类
      */
     @PostConstruct
@@ -206,7 +196,7 @@ public class RedisUtils {
     }
 
     public Long zcount(String key) {
-        return jedisCluster.zcount(key, Z_MIN_SCORE, Z_MAX_SCORE);
+        return jedisCluster.zcount(key, RedisConstant.Z_MIN_SCORE, RedisConstant.Z_MAX_SCORE);
     }
 
     public Long zcount(String key, String min, String max) {
@@ -238,6 +228,7 @@ public class RedisUtils {
 
     /**
      * 批量get
+     * 注意需要保证批量执行的key在同一个hash槽
      *
      * @param list 需要获取的Key列表
      * @param type 获取数据的类型
@@ -262,6 +253,7 @@ public class RedisUtils {
 
     /**
      * 批量set
+     * 注意需要保证批量执行的key在同一个hash槽
      *
      * @param map 需要执行set的key 和 value
      */
