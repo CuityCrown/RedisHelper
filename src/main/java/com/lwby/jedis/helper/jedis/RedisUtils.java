@@ -1,10 +1,12 @@
 package com.lwby.jedis.helper.jedis;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.lwby.jedis.helper.config.JedisConfig;
 import com.lwby.jedis.helper.constant.RedisConstant;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import redis.clients.jedis.Tuple;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
@@ -60,17 +63,17 @@ public class RedisUtils {
     }
 
     public void set(String key, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         jedisCluster.set(key, json);
     }
 
     public void setex(String key, int expires, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         jedisCluster.setex(key, expires, json);
     }
 
     public <T> T getSet(String key, Object value, TypeReference<T> type) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         String oldJson = jedisCluster.getSet(key, json);
         return JSONObject.parseObject(oldJson, type);
     }
@@ -119,7 +122,7 @@ public class RedisUtils {
     }
 
     public Long lpush(String key, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.lpush(key, json);
     }
 
@@ -129,7 +132,7 @@ public class RedisUtils {
     }
 
     public Long rpush(String key, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.rpush(key, json);
     }
 
@@ -139,7 +142,7 @@ public class RedisUtils {
     }
 
     public Long lrem(String key, long count, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.lrem(key, count, json);
     }
 
@@ -148,7 +151,7 @@ public class RedisUtils {
     }
 
     public String lset(String key, long index, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.lset(key, index, json);
     }
 
@@ -168,7 +171,7 @@ public class RedisUtils {
     }
 
     public Long hset(String key, String field, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.hset(key, field, json);
     }
 
@@ -182,12 +185,12 @@ public class RedisUtils {
     }
 
     public void zadd(String key, double score, String member) {
-        String json = JSONObject.toJSONString(member);
+        String json = JSON.toJSONString(member);
         jedisCluster.zadd(key, score, json);
     }
 
     public void zadd(String key, double score, Object member) {
-        String json = JSONObject.toJSONString(member);
+        String json = JSON.toJSONString(member);
         jedisCluster.zadd(key, score, json);
     }
 
@@ -204,7 +207,7 @@ public class RedisUtils {
     }
 
     public Long zrem(String key, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.zrem(key, json);
     }
 
@@ -217,7 +220,7 @@ public class RedisUtils {
     }
 
     public Double zincrby(String key, double score, Object value) {
-        String json = JSONObject.toJSONString(value);
+        String json = JSON.toJSONString(value);
         return jedisCluster.zincrby(key, score, json);
     }
 
@@ -227,8 +230,7 @@ public class RedisUtils {
     }
 
     /**
-     * 批量get
-     * 注意需要保证批量执行的key在同一个hash槽
+     * 批量get 注意: 1.需要保证批量执行的key在同一个hash槽 2.避免数据倾斜
      *
      * @param list 需要获取的Key列表
      * @param type 获取数据的类型
@@ -252,8 +254,7 @@ public class RedisUtils {
     }
 
     /**
-     * 批量set
-     * 注意需要保证批量执行的key在同一个hash槽
+     * 批量set 注意: 1.需要保证批量执行的key在同一个hash槽 2.避免数据倾斜
      *
      * @param map 需要执行set的key 和 value
      */
@@ -264,10 +265,64 @@ public class RedisUtils {
         List<String> list = new ArrayList<>();
         for (String key : map.keySet()) {
             list.add(key);
-            list.add(JSONObject.toJSONString(map.get(key)));
+            list.add(JSON.toJSONString(map.get(key)));
         }
         String[] keysValues = list.toArray(new String[] {});
         jedisCluster.mset(keysValues);
+    }
+
+    /**
+     * 根据key获取数据列表 如果缓存不存在回调callable并存入缓存
+     *
+     * @param key      redisKey
+     * @param type     数据类型
+     * @param callable 缓存不存在回调接口
+     * @param <T>      数据泛型
+     * @return 数据列表
+     */
+    public <T> List<T> getList(String key, TypeReference<List<T>> type, Callable<List<T>> callable) {
+        List<T> result = null;
+        try {
+            String json = jedisCluster.get(key);
+            if (StringUtils.isNotBlank(json)) {
+                result = JSONObject.parseObject(json, type);
+            } else {
+                result = callable.call();
+                if (CollectionUtils.isNotEmpty(result)) {
+                    jedisCluster.set(key, JSON.toJSONString(result));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("RedisUtils.getList 执行出错 redisKey:{}", key, e);
+        }
+        return result;
+    }
+
+    /**
+     * 根据key获取数据 如果缓存不存在回调callable并存入缓存
+     *
+     * @param key      redisKey
+     * @param type     数据类型
+     * @param callable 缓存不存在回调接口
+     * @param <T>      数据泛型
+     * @return 数据列表
+     */
+    public <T> T get(String key, TypeReference<T> type, Callable<T> callable) {
+        T result = null;
+        try {
+            String json = jedisCluster.get(key);
+            if (StringUtils.isNotBlank(json)) {
+                result = JSONObject.parseObject(json, type);
+            } else {
+                result = callable.call();
+                if (result != null) {
+                    jedisCluster.set(key, JSON.toJSONString(result));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("RedisUtils.get 执行出错 redisKey:{}", key, e);
+        }
+        return result;
     }
 
 }
