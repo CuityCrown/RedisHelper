@@ -229,6 +229,11 @@ public class RedisUtils {
         return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
     }
 
+    public <T> Map<T, Double> zrevrange(String key, long start, long end, TypeReference<T> type) {
+        Set<Tuple> tuples = jedisCluster.zrevrangeWithScores(key, start, end);
+        return tuples.stream().collect(Collectors.toMap(k -> JSONObject.parseObject(k.getElement(), type), Tuple::getScore));
+    }
+
     /**
      * 批量get 注意: 1.需要保证批量执行的key在同一个hash槽 2.控制数据倾斜程度
      *
