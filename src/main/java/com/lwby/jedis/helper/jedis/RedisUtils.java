@@ -230,7 +230,7 @@ public class RedisUtils {
     }
 
     /**
-     * 批量get 注意: 1.需要保证批量执行的key在同一个hash槽 2.避免数据倾斜
+     * 批量get 注意: 1.需要保证批量执行的key在同一个hash槽 2.控制数据倾斜程度
      *
      * @param list 需要获取的Key列表
      * @param type 获取数据的类型
@@ -254,7 +254,7 @@ public class RedisUtils {
     }
 
     /**
-     * 批量set 注意: 1.需要保证批量执行的key在同一个hash槽 2.避免数据倾斜
+     * 批量set 注意: 1.需要保证批量执行的key在同一个hash槽 2.控制数据倾斜程度
      *
      * @param map 需要执行set的key 和 value
      */
