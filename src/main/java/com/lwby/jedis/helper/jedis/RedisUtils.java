@@ -365,7 +365,7 @@ public class RedisUtils {
      * @param <T>      数据泛型
      * @return 数据列表
      */
-    public <T> List<T> getList(String key, TypeReference<List<T>> type, Callable<List<T>> callable) {
+    public <T> List<T> getList(String key, TypeReference<List<T>> type, int expires, Callable<List<T>> callable) {
         try (Jedis jedis = jedisPool.getResource()) {
             List<T> result = null;
             try {
@@ -375,7 +375,7 @@ public class RedisUtils {
                 } else {
                     result = callable.call();
                     if (CollectionUtils.isNotEmpty(result)) {
-                        jedis.set(key, JSON.toJSONString(result));
+                        jedis.setex(key, expires, JSON.toJSONString(result));
                     }
                 }
             } catch (Exception e) {
@@ -394,7 +394,7 @@ public class RedisUtils {
      * @param <T>      数据泛型
      * @return 数据列表
      */
-    public <T> T get(String key, TypeReference<T> type, Callable<T> callable) {
+    public <T> T get(String key, TypeReference<T> type, int expires, Callable<T> callable) {
         try (Jedis jedis = jedisPool.getResource()) {
             T result = null;
             try {
@@ -404,7 +404,7 @@ public class RedisUtils {
                 } else {
                     result = callable.call();
                     if (result != null) {
-                        jedis.set(key, JSON.toJSONString(result));
+                        jedis.setex(key, expires, JSON.toJSONString(result));
                     }
                 }
             } catch (Exception e) {

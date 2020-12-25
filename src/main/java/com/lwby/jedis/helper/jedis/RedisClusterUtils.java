@@ -288,7 +288,7 @@ public class RedisClusterUtils {
      * @param <T>      数据泛型
      * @return 数据列表
      */
-    public <T> List<T> getList(String key, TypeReference<List<T>> type, Callable<List<T>> callable) {
+    public <T> List<T> getList(String key, TypeReference<List<T>> type, int expires, Callable<List<T>> callable) {
         List<T> result = null;
         try {
             String json = jedisCluster.get(key);
@@ -297,7 +297,7 @@ public class RedisClusterUtils {
             } else {
                 result = callable.call();
                 if (CollectionUtils.isNotEmpty(result)) {
-                    jedisCluster.set(key, JSON.toJSONString(result));
+                    jedisCluster.setex(key, expires, JSON.toJSONString(result));
                 }
             }
         } catch (Exception e) {
@@ -315,7 +315,7 @@ public class RedisClusterUtils {
      * @param <T>      数据泛型
      * @return 数据列表
      */
-    public <T> T get(String key, TypeReference<T> type, Callable<T> callable) {
+    public <T> T get(String key, TypeReference<T> type, int expires, Callable<T> callable) {
         T result = null;
         try {
             String json = jedisCluster.get(key);
@@ -324,7 +324,7 @@ public class RedisClusterUtils {
             } else {
                 result = callable.call();
                 if (result != null) {
-                    jedisCluster.set(key, JSON.toJSONString(result));
+                    jedisCluster.setex(key, expires, JSON.toJSONString(result));
                 }
             }
         } catch (Exception e) {
