@@ -3,13 +3,11 @@ package com.lwby.jedis.helper.config;
 import lombok.Data;
 
 /**
- * description:
+ * jedis配置项封装类
  *
  * @author 刘一博
- * @version V1.0
- * @date 2020/5/15 11:47
+ * @version JedisConfig.java, v 0.1 2020年5月15日 10:51 刘一博 Exp $
  */
-
 @Data
 public class JedisConfig {
 
@@ -23,11 +21,11 @@ public class JedisConfig {
 
     private int timeout;
 
-    private int maxIdle = 8;
+    private int maxIdle = 10;
 
     private int minIdle = 0;
 
-    private int maxActive = 8;
+    private int maxActive = 10;
 
     private int maxWait = -1;
 

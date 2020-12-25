@@ -5,11 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * description:
+ * spring启动配置类 jedis相关
  *
  * @author 刘一博
- * @version V1.0
- * @date 2020/5/15 14:46
+ * @version JedisConfiguration.java, v 0.1 2020年5月15日 10:51 刘一博 Exp $
  */
 @Configuration
 public class JedisConfiguration {
