@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.PostConstruct;
 
@@ -23,17 +24,19 @@ public class RedisUtils {
     @Autowired
     private JedisConfig jedisConfig;
 
+    private JedisPool jedisPool;
+
     /**
      * 初始化redis工具类
      */
     @PostConstruct
     private void init() {
         try {
-            JedisPool jedisPool = new JedisPool();
+            JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+            jedisPool = new JedisPool(jedisPoolConfig, jedisConfig.getHost(), jedisConfig.getPort(), jedisConfig.getTimeout());
         } catch (Exception e) {
             LOGGER.error("init RedisUtils is failed", e);
         }
-
     }
 
 }
