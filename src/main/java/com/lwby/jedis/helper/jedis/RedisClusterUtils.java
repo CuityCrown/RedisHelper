@@ -44,6 +44,9 @@ public class RedisClusterUtils {
     private void init() {
         try {
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+            jedisPoolConfig.setMaxTotal(jedisConfig.getMaxTotal());
+            jedisPoolConfig.setMinIdle(jedisConfig.getMinIdle());
+            jedisPoolConfig.setMaxIdle(jedisConfig.getMaxIdle());
             String[] nodes = jedisConfig.getNodes().split(RedisConstant.DEFAULT_SPLIT);
             Set<HostAndPort> hostAndPorts = Arrays.stream(nodes).map(n -> {
                 String[] split = n.split(RedisConstant.HOST_AND_PORT_SPLIT);

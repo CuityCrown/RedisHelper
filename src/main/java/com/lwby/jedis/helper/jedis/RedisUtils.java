@@ -47,6 +47,10 @@ public class RedisUtils {
     private void init() {
         try {
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+            jedisPoolConfig.setMaxTotal(jedisConfig.getMaxTotal());
+            jedisPoolConfig.setMinIdle(jedisConfig.getMinIdle());
+            jedisPoolConfig.setMaxIdle(jedisConfig.getMaxIdle());
+            jedisPoolConfig.setMaxWaitMillis(jedisConfig.getMaxWait());
             jedisPool = new JedisPool(jedisPoolConfig, jedisConfig.getHost(), jedisConfig.getPort(), jedisConfig.getTimeout());
         } catch (Exception e) {
             LOGGER.error("init RedisUtils is failed", e);
