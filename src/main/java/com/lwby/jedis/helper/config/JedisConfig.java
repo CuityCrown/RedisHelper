@@ -22,7 +22,7 @@ public class JedisConfig {
     /**
      * 超时时间
      */
-    private int timeout;
+    private int timeout = 1000;
 
     /**
      * 最大空闲连接数
