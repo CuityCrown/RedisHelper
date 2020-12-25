@@ -11,12 +11,24 @@ import lombok.Data;
 @Data
 public class JedisConfig {
 
+    /**
+     * 使用数据库编号
+     */
     private int database = 0;
 
+    /**
+     * ip地址
+     */
     private String host = "localhost";
 
+    /**
+     * 密码
+     */
     private String password;
 
+    /**
+     * 端口号
+     */
     private int port = 6379;
 
     /**
@@ -39,12 +51,19 @@ public class JedisConfig {
      */
     private int maxTotal = 10;
 
+    /**
+     * 非活跃连接活跃时间
+     */
     private int maxWait = -1;
 
-    private String master;
-
+    /**
+     * 集群节点信息
+     */
     private String nodes;
 
+    /**
+     * 最大重试次数
+     */
     private Integer maxRedirects = 1;
 
 }
