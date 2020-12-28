@@ -328,7 +328,9 @@ public class RedisUtils {
             if (CollectionUtils.isNotEmpty(jsonList)) {
                 List<T> result = new ArrayList<>();
                 for (String json : jsonList) {
-                    result.add(JSONObject.parseObject(json, type));
+                    if (StringUtils.isNotBlank(json)) {
+                        result.add(JSONObject.parseObject(json, type));
+                    }
                 }
                 return result;
             }
