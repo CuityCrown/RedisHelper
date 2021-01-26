@@ -14,6 +14,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisConfigInit {
 
+    /**
+     * 初始化jedis配置
+     * @return jedis配置信息类
+     */
     @Bean
     @ConfigurationProperties(value = "jedis.redis")
     public JedisConfig createJedisConfig() {

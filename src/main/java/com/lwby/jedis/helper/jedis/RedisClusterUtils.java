@@ -302,7 +302,7 @@ public class RedisClusterUtils {
                     jedisCluster.setex(key, expires, JSON.toJSONString(result));
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("RedisUtils.getList 执行出错 redisKey:{}", key, e);
         }
         return result;
@@ -329,7 +329,7 @@ public class RedisClusterUtils {
                     jedisCluster.setex(key, expires, JSON.toJSONString(result));
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("RedisUtils.get 执行出错 redisKey:{}", key, e);
         }
         return result;
