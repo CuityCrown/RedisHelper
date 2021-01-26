@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @version JedisConfiguration.java, v 0.1 2020年5月15日 10:51 刘一博 Exp $
  */
 @Configuration
-public class JedisInit {
+public class RedisConfigInit {
 
     @Bean
     @ConfigurationProperties(value = "jedis.redis")
