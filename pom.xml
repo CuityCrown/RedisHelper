@@ -43,27 +43,24 @@
             <version>4.3</version>
         </dependency>
     </dependencies>
-
-
-    <!-- 设定团队持续集成发布包服务器  -->
-    <distributionManagement>
+    <repositories>
         <repository>
-            <id>lwby-releases</id>
-            <name>releases repository</name>
-            <url>http://maven.bayread.com/nexus/content/repositories/releases/</url>
+            <id>central</id>
+            <url>https://maven.aliyun.com/repository/central</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
-        <snapshotRepository>
-            <id>lwby-snapshots</id>
-            <name>snapshots repository</name>
-            <url>http://maven.bayread.com/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
+    </repositories>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -73,6 +70,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
